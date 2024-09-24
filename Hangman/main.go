@@ -48,9 +48,14 @@ func pendu(mot []string) {
 		}
 	}
 	fmt.Println("Good luck, you have 10 attempts.")
-
+	var lettre string
 	for i := 10; i >= 0 ; i--{
 		fmt.Println(strings.Join(caca, ""))	
+		if !veriflettre(lettre){
+			printlependu(i)
+		}else{
+			i++
+		}
 		//le plan c'était de demander une lettre puis vérifier si elle est est dans le mot avec une loop pour chaque caractère
 		//et print le pendu plus message essai remaining si ct faux sauf que euuuuuuuuuh
 		//vazy prendre un argument de la console ca ma casser les couilles
@@ -61,4 +66,8 @@ func pendu(mot []string) {
 
 func printlependu(i int){
 	//bah elle doit faire son nom quoi 
+}
+
+func veriflettre(lettre string) bool{
+	return true
 }
