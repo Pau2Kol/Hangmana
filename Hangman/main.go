@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"math/rand"
 	"os"
 	"strings"
-)	
+)
 
 func main() {
 	mot := mot()
@@ -14,7 +15,7 @@ func main() {
 }
 
 func mot() []string {
-	fileIO, err := os.OpenFile("dic/words.txt", os.O_RDWR, 0600) //lit le fichier ta capté 
+	fileIO, err := os.OpenFile("dic/words.txt", os.O_RDWR, 0600) //lit le fichier ta capté
 	if err != nil {
 		panic(err)
 	}
@@ -26,9 +27,8 @@ func mot() []string {
 	}
 
 	lines := strings.Split(string(rawBytes), "\n")
-	rdmnbr := rand.Intn(len(lines)) //choisi nombre aléatoire dans la limite
+	rdmnbr := rand.Intn(len(lines))                               //choisi nombre aléatoire dans la limite
 	selecmot := strings.ToUpper(strings.TrimSpace(lines[rdmnbr])) //met le mot en maj
-
 
 	return strings.Split(selecmot, "") //divise le mot en mettant des espaces
 }
@@ -36,38 +36,128 @@ func mot() []string {
 func pendu(mot []string) {
 	motC := strings.Join(mot, " ")
 	fmt.Println(motC) // Print le mot caché faut penser a l'enlever c pour les tests
-	caca := strings.Split(motC, "")
-
-	rdmindex := rand.Intn(len(mot)-1)
-	if caca[rdmindex] == " "{	//la je prend un index aléatoire qui n'est pas espace comme lettre de départ
-		rdmindex += 1
-	}
-	for i,v := range caca{
-		if v >= "A" && v <= "Z" && i != rdmindex{ //change le mot en _ sauf rdmindex
-			caca[i] = "_"
+	motshown := strings.Split(motC, "")
+	luse := []string{}
+	for i, v := range motshown {
+		if v >= "A" && v <= "Z" { //change le mot en _ sauf rdmindex
+			motshown[i] = "_"
 		}
 	}
-	fmt.Println("Good luck, you have 10 attempts.")
-	var lettre string
-	for i := 10; i >= 0 ; i--{
-		fmt.Println(strings.Join(caca, ""))	
-		if !veriflettre(lettre){
+	motref := string(motC)
+	for i := 0; len(mot)/2-1 > i; i++ {
+		rdmindex := rdm(motshown)
+		motshown[rdmindex] = string(motC[rdmindex])
+	}
+	fmt.Println("Bonne chance t'a 10 essais sinon: rm -rf / ")
+
+	for i := 10; i > 0; i-- {
+		fmt.Println(strings.Join(motshown, "")) //faut supprimer debug
+		guess := input(mot)
+		if guess == strings.Join(mot,""){ //c vrmnt de la merde 4 ligne parce que j'ai la flemme si guess = mot a trouver
+			 welive()
+			 return
+		}
+		luse = append(luse, guess)                 //Prend l'input de l'user
+		if !veriflettre(motref, guess, motshown) { // motshown == string[] / motC et motref == string
 			printlependu(i)
-		}else{
-			i++
 		}
-		//le plan c'était de demander une lettre puis vérifier si elle est est dans le mot avec une loop pour chaque caractère
-		//et print le pendu plus message essai remaining si ct faux sauf que euuuuuuuuuh
-		//vazy prendre un argument de la console ca ma casser les couilles
-		//Bref faut: demander lettre -> update le mot si vrai print pendu avec la fonction printlependu si faux 
-		//A FINIR
+		if compare(motshown, motref) {
+			welive()
+			return
+		}
+		fmt.Print("\nLettre(s) déjà utilisés",luse,"\n")
+
+	}
+	fmt.Println("Nan le niveau c'est grave la")
+}
+
+func printlependu(i int) {
+	fmt.Printf("Pas présent ou déjà mis(si tu l'a déjà mis t un peu teubé), il te reste %d essais\n", i)
+	file, err := os.Open("dic/hangman.txt")
+	if err != nil {
+		fmt.Println("Error opening hangman.txt:", err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineCount := 0
+	startLine := (10 - i) * 8 // José 8 ligne
+	for scanner.Scan() {
+		if lineCount >= startLine && lineCount < startLine+7 {
+			fmt.Println(scanner.Text())
+		}
+		lineCount++
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("frr le fichier iléou", err)
 	}
 }
 
-func printlependu(i int){
-	//bah elle doit faire son nom quoi 
+func veriflettre(motref string, guess string, motshown []string) bool {
+	c := false
+	for i := range motref {
+		if string(motref[i]) == guess && guess != motshown[i] {
+			motshown[i] = string(motref[i])
+			c = true
+		}
+
+	}
+	return c
 }
 
-func veriflettre(lettre string) bool{
-	return false
+func rdm(motshown []string) int {
+	rdmindex := rand.Intn(len(motshown))
+	for motshown[rdmindex] != "_" {
+		rdmindex = rand.Intn(len(motshown) - 1)
+	}
+	fmt.Println(rdmindex) //debug a enlever
+	return rdmindex
+}
+
+func input(mot []string) string {
+	var guess string
+	fmt.Print("\nMot ou lettre :")
+	fmt.Scanln(&guess)
+	guess = strings.ToUpper(guess)
+	if guess >= "A" && guess <= "Z" || guess == strings.Join(mot,"") {
+		return guess
+	}
+	return input(mot)
+
+}
+
+func compare(motshown []string, motref string) bool { // aucun intêret j'ai fait une fonction pour une ligne
+	return strings.Join(motshown, "") == motref
+}
+func welive() {
+	str := `⠀⠀⠀⠀⠀⢀⡤⠖⠒⠢⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+	⠀⠀⠀⠀⠀⠀⠀⠀⡴⠃⠀⠀⠀⠀⠀⠙⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+	⠀⠀⠀⠀⠀⠀⠀⣰⠁⠀⠀⠀⠀⠀⠀⠀⠈⠳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+	⠀⠀⠀⠀⠀⠀⡰⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+	⠀⠀⠀⠀⣠⠞⠁⠀⠀⠀⠀⠀⠀⠀⠂⠀⠤⠤⡀⠈⠳⣄⠀⠀⠀⠀⠀⠀⠀⠀
+	⠀⠀⣠⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠑⢄⠀⠀⠀⠀⠀⠀
+	⢠⠞⠁⠀⣀⣠⣤⠤⠤⠤⠤⢤⣤⠤⠤⠤⠤⣤⣀⣀⡀⠀⠀⠀⠑⢤⠀⠀⠀⠀
+	⣣⠔⠚⠻⣄⣡⣞⣄⣠⣆⠀⢼⣼⣄⣀⣀⣠⣆⠜⡘⡻⠟⠙⣲⠦⣈⢳⡀⠀⠀
+	⡇⠒⢲⡤⡜⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠙⠛⠤⣖⠬⠓⠂⠉⣿⠇⠀⠀
+	⠙⠲⠦⠬⣧⡀⠀⠀⠀⠀⠀⣠⣿⣿⣷⡄⠀⠀⠀⠀⠀⣞⠀⢀⣲⠖⠋⠀⠀⠀
+	⠀⠀⠀⠀⠘⣟⢢⠃⠀⠀⠀⠉⠙⠻⠛⠁⠀⠀⠀⢀⡜⠒⢋⡝⠁⢀⣀⣤⠂⠀
+	⠀⠀⠀⠀⠀⡇⠷⠆⠶⠖⠀⠀⠀⠀⠀⠀⠀⠀⣠⠮⠤⠟⠉⠀⢰⠱⡾⣧⠀⠀
+	⠀⠀⠀⠀⠀⠹⢄⣀⣀⠀⠀⠀⠀⠀⠀⣀⡤⠚⠁⠀⢠⣤⡀⣼⢾⠀⠀⡟⠀⠀
+	⠀⠀⠀⠀⠀⠀⠀⠀⠙⠛⠛⠒⡏⠀⡡⠣⢖⣯⠶⢄⣀⣿⡾⠋⢸⢀⡶⠿⠲⡀
+	⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⣹⠃⣀⣤⠞⠋⠀⠉⠢⣿⣿⡄⠀⣿⠏⠀⠀⠐⢣
+	⠀⠀⠀⠀⠀⠀⠀⠀⣠⠞⢱⢡⡾⠋⠀⠀⢀⡐⣦⣀⠈⠻⣇⢸⢁⣤⡙⡆⠈⡏
+	⠀⠀⠀⠀⠀⠀⣠⠎⢁⠔⡳⡟⠀⠐⠒⠒⠋⠀⠠⡯⠙⢧⡈⠻⣮⠯⣥⠧⠞⠁
+	⠀⠀⠀⣀⠴⠋⠀⢶⠋⢸⡝⠀⠀⠀⠀⠀⠀⠀⠀⣸⢦⠀⠙⡆⠘⠦⢄⡀⠀⠀
+	⠀⠀⣸⠅⢀⡤⢺⢸⠀⢸⡃⠤⠀⠀⠀⠀⣀⡤⢚⣋⣿⢄⡀⢇⡀⠀⠀⣝⡶⠀
+	⠀⠀⢿⠀⡏⠀⠘⠞⠀⢸⡵⣦⠤⠤⠖⣿⠥⠞⠉⠀⢸⠖⠁⠀⠙⠢⣑⠶⣽⢂
+	⠀⠀⠸⠤⠃⠀⠀⠀⠀⠀⠉⢳⠂⠈⡽⠁⠀⠀⠀⢀⡼⠒⠓⢤⠀⠀⠀⠙⠚⠛
+	⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠓⡎⠀⠀⠀⠀⢠⠎⣠⠀⠀⠈⢳⠀⠀⠀⠀⠀
+	⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⢸⡶⠗⠋⣱⠄⠀⠀⠀⣧⠀⠀⠀⢀
+	⠀⠀⠀⠀⠀⠀⠀⣀⠴⠒⠒⠦⣤⣷⠂⢀⡸⠁⠀⡼⠁⠀⠀⠀⠈⢺⠀⠀⠀⠀
+	⠀⠀⠀⠀⠀⢠⠋⢀⣀⡀⠀⠀⠀⠀⠀⠈⡇⠀⠀⠙⠢⠤⠤⣄⡤⠼⠀⠀⠀⠀
+	⠀⠀⠀⠀⠀⠀⠑⢦⣄⣉⣑⠢⠄⠀⠀⠀⡇`
+
+	fmt.Print(str, "we live we love")
 }
