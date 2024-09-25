@@ -69,5 +69,5 @@ func printlependu(i int){
 }
 
 func veriflettre(lettre string) bool{
-	return true
+	return false
 }
