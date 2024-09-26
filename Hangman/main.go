@@ -50,7 +50,7 @@ func pendu(mot []string) {
 	}
 	fmt.Println("Bonne chance t'a 10 essais sinon: rm -rf / ")
 
-	for i := 10; i > 0; i-- {
+	for i := 10; i > 0; {
 		fmt.Println(strings.Join(motshown, "")) //faut supprimer debug
 		guess := input(mot)
 		if guess == strings.Join(mot,""){ //c vrmnt de la merde 4 ligne parce que j'ai la flemme si guess = mot a trouver
@@ -59,7 +59,9 @@ func pendu(mot []string) {
 		}
 		luse = append(luse, guess)                 //Prend l'input de l'user
 		if !veriflettre(motref, guess, motshown) { // motshown == string[] / motC et motref == string
+			i--
 			printlependu(i)
+		
 		}
 		if compare(motshown, motref) {
 			welive()
@@ -72,7 +74,7 @@ func pendu(mot []string) {
 }
 
 func printlependu(i int) {
-	fmt.Printf("Pas présent ou déjà mis(si tu l'a déjà mis t un peu teubé), il te reste %d essais\n", i)
+	fmt.Printf("Pas présent ou déjà mis, il te reste %d essais\n", i)
 	file, err := os.Open("dic/hangman.txt")
 	if err != nil {
 		fmt.Println("Error opening hangman.txt:", err)
@@ -82,7 +84,7 @@ func printlependu(i int) {
 
 	scanner := bufio.NewScanner(file)
 	lineCount := 0
-	startLine := (10 - i) * 8 // José 8 ligne
+	startLine := (9 - i) * 8 // José 8 ligne
 	for scanner.Scan() {
 		if lineCount >= startLine && lineCount < startLine+7 {
 			fmt.Println(scanner.Text())
