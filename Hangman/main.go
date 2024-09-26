@@ -60,6 +60,9 @@ func pendu(mot []string) {
 		luse = append(luse, guess)                 //Prend l'input de l'user
 		if !veriflettre(motref, guess, motshown) { // motshown == string[] / motC et motref == string
 			i--
+			if len(guess) > 1 && i - 1 >= 0{
+				i--
+			}
 			printlependu(i)
 		
 		}
