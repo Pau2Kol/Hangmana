@@ -15,7 +15,7 @@ func main() {
 }
 
 func mot() []string {
-	fileIO, err := os.OpenFile("dic/words.txt", os.O_RDWR, 0600) //lit le fichier ta capté
+	fileIO, err := os.OpenFile("dic/words.txt", os.O_RDWR, 0600) //lit le fichier si existe pas erreur
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +26,7 @@ func mot() []string {
 		panic(err)
 	}
 
-	lines := strings.Split(string(rawBytes), "\n")
+	lines := strings.Split(string(rawBytes), "\n") //lines contient les mots du fichier
 	rdmnbr := rand.Intn(len(lines))                               //choisi nombre aléatoire dans la limite
 	selecmot := strings.ToUpper(strings.TrimSpace(lines[rdmnbr])) //met le mot en maj
 
@@ -70,23 +70,24 @@ func pendu(mot []string) {
 		fmt.Print("\nLettre(s) déjà utilisés",luse,"\n")
 
 	}
-	fmt.Println("Nan le niveau c'est grave la")
+	fmt.Println("\nNan le niveau c'est grave la le mot fût : ",strings.Join(mot,""))
+
 }
 
 func printlependu(i int) {
 	fmt.Printf("Pas présent ou déjà mis, il te reste %d essais\n", i)
-	file, err := os.Open("dic/hangman.txt")
+	file, err := os.Open("dic/hangman.txt") 	//pareil ouvre le fichier si erreur print erreur
 	if err != nil {
-		fmt.Println("Error opening hangman.txt:", err)
+		fmt.Println("ilé où le hangman", err)
 		return
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(file) //fait un buffer qui va lire le fichier
 	lineCount := 0
-	startLine := (9 - i) * 8 // José 8 ligne
+	startLine := (9 - i) * 8 // José 8 ligne permet d'afficher le pendu suivant 
 	for scanner.Scan() {
-		if lineCount >= startLine && lineCount < startLine+7 {
+		if lineCount >= startLine && lineCount < startLine+7 { //print le pendu
 			fmt.Println(scanner.Text())
 		}
 		lineCount++
