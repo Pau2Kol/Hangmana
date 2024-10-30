@@ -15,18 +15,18 @@ func main() {
 }
 
 func mot() []string {
-	fileIO, err := os.OpenFile("dic/words.txt", os.O_RDWR, 0600) //lit le fichier si existe pas erreur
+	fileIO, err := os.OpenFile("dic/words.txt", os.O_RDWR, 0600) //open le fichier
 	if err != nil {
 		panic(err)
 	}
 	defer fileIO.Close()
 
-	rawBytes, err := io.ReadAll(fileIO)
+	rawBytes, err := io.ReadAll(fileIO) //lit le fichier
 	if err != nil {
 		panic(err)
 	}
 
-	lines := strings.Split(string(rawBytes), "\n") //lines contient les mots du fichier
+	lines := strings.Split(string(rawBytes), "\n")                //lines contient les mots du fichier
 	rdmnbr := rand.Intn(len(lines))                               //choisi nombre aléatoire dans la limite
 	selecmot := strings.ToUpper(strings.TrimSpace(lines[rdmnbr])) //met le mot en maj
 
@@ -51,35 +51,35 @@ func pendu(mot []string) {
 	fmt.Println("Bonne chance t'a 10 essais sinon: rm -rf / ")
 
 	for i := 10; i > 0; {
-		fmt.Println(strings.Join(motshown, "")) //faut supprimer debug
+			fmt.Println(strings.Join(motshown, "")) //Print le mot avec tiret
 		guess := input(mot)
-		if guess == strings.Join(mot,""){ //c vrmnt de la merde 4 ligne parce que j'ai la flemme si guess = mot a trouver
-			 welive()
-			 return
+		if guess == strings.Join(mot, "") { //c vrmnt de la merde 4 ligne parce que j'ai la flemme si guess = mot a trouver
+			welive()
+			return
 		}
 		luse = append(luse, guess)                 //Prend l'input de l'user
 		if !veriflettre(motref, guess, motshown) { // motshown == string[] / motC et motref == string
 			i--
-			if len(guess) > 1 && i - 1 >= 0{
+			if len(guess) > 1 && i-1 >= 0 {
 				i--
 			}
 			printlependu(i)
-		
+
 		}
 		if compare(motshown, motref) {
 			welive()
 			return
 		}
-		fmt.Print("\nLettre(s) déjà utilisés",luse,"\n")
+		fmt.Print("\nLettre(s)/mot(s) déjà utilisés", luse, "\n")
 
 	}
-	fmt.Println("\nNan le niveau c'est grave la le mot fût : ",strings.Join(mot,""))
+	fmt.Println("\nNan le niveau c'est grave la le mot fût : ", strings.Join(mot, ""))
 
 }
 
 func printlependu(i int) {
 	fmt.Printf("Pas présent ou déjà mis, il te reste %d essais\n", i)
-	file, err := os.Open("dic/hangman.txt") 	//pareil ouvre le fichier si erreur print erreur
+	file, err := os.Open("dic/hangman.txt") //pareil ouvre le fichier si erreur print erreur
 	if err != nil {
 		fmt.Println("ilé où le hangman", err)
 		return
@@ -88,7 +88,7 @@ func printlependu(i int) {
 
 	scanner := bufio.NewScanner(file) //fait un buffer qui va lire le fichier
 	lineCount := 0
-	startLine := (9 - i) * 8 // José 8 ligne permet d'afficher le pendu suivant 
+	startLine := (9 - i) * 8 // José 8 ligne permet d'afficher le pendu suivant
 	for scanner.Scan() {
 		if lineCount >= startLine && lineCount < startLine+7 { //print le pendu
 			fmt.Println(scanner.Text())
@@ -127,7 +127,7 @@ func input(mot []string) string {
 	fmt.Print("\nMot ou lettre :")
 	fmt.Scanln(&guess)
 	guess = strings.ToUpper(guess)
-	if guess >= "A" && guess <= "Z" || guess == strings.Join(mot,"") {
+	if guess >= "A" && guess <= "Z" || guess == strings.Join(mot, "") {
 		return guess
 	}
 	return input(mot)
@@ -166,4 +166,7 @@ func welive() {
 	⠀⠀⠀⠀⠀⠀⠑⢦⣄⣉⣑⠢⠄⠀⠀⠀⡇`
 
 	fmt.Print(str, "we live we love")
+}
+func printasci(motshown []string) {
+	//bah ya rien
 }
